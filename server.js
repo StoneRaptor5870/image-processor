@@ -80,6 +80,10 @@ app.get('/status/:requestId', (req, res) => {
 // Webhook handler
 app.post('/webhook', webhookHandler);
 
+app.use("/", (req, res) => {
+  res.send("Hello from Image Processor");
+});
+
 app.listen(3000, () => {
   console.log('Server running on port 3000');
 });

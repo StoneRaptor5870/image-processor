@@ -3,6 +3,7 @@ const multer = require('multer')
 const csv = require('csv-parser')
 const fs = require('fs')
 const uuid = require('uuid')
+const { Parser } = require('json2csv');
 const db = require('./db')
 const { processImages } = require('./worker')
 const { webhookHandler } = require('./webhook')
@@ -60,13 +61,13 @@ app.post('/upload', upload.single('file'), (req, res) => {
 
 // Status API: Check status using request ID
 app.get('/status/:requestId', (req, res) => {
-  const requestId = req.params.requestId
+  const requestId = req.params.requestId;
 
   db.query(`SELECT status FROM requests WHERE request_id = $1`, [requestId])
     .then((result) => {
-      const row = result.rows[0]
+      const row = result.rows[0];
       if (!row) {
-        return res.status(404).json({ error: 'Request ID not found' })
+        return res.status(404).json({ error: 'Request ID not found' });
       }
 
       if (row.status === 'completed') {
@@ -75,18 +76,23 @@ app.get('/status/:requestId', (req, res) => {
           [requestId],
         )
           .then((result) => {
-            res.json({
-              status: row.status,
-              data: result.rows,
-            })
+            // Convert the data to CSV format
+            const fields = ['product_name', 'input_image_urls', 'output_image_urls'];
+            const json2csvParser = new Parser({ fields });
+            const csv = json2csvParser.parse(result.rows);
+
+            // Set the headers to trigger a download
+            res.header('Content-Type', 'text/csv');
+            res.attachment(`products_${requestId}.csv`);
+            res.send(csv);
           })
-          .catch((err) => res.status(500).json({ error: err.message }))
+          .catch((err) => res.status(500).json({ error: err.message }));
       } else {
-        res.json({ status: row.status })
+        res.json({ status: row.status });
       }
     })
-    .catch((err) => res.status(500).json({ error: err.message }))
-})
+    .catch((err) => res.status(500).json({ error: err.message }));
+});
 
 // Webhook Handler
 app.post('/webhook', webhookHandler)

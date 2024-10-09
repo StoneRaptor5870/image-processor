@@ -14,7 +14,9 @@ const s3 = new AWS.S3({
 // Function to trigger the webhook after processing is complete
 async function triggerWebhook(requestId) {
   try {
-    await axios.post('https://image-processor-tu7z.onrender.com/webhook', { requestId })
+    await axios.post('https://image-processor-tu7z.onrender.com/webhook', {
+      requestId,
+    })
   } catch (err) {
     console.error('Failed to trigger webhook', err)
   }

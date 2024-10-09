@@ -1,14 +1,14 @@
-const { Pool } = require('pg');
-const dotenv = require('dotenv');
+const { Pool } = require('pg')
+const dotenv = require('dotenv')
 
-dotenv.config();
+dotenv.config()
 
 const pool = new Pool({
-  connectionString: process.env.DB
-});
+  connectionString: process.env.DB,
+})
 
 const createTables = async () => {
-  const client = await pool.connect();
+  const client = await pool.connect()
   try {
     await client.query(`
       CREATE TABLE IF NOT EXISTS requests (
@@ -18,7 +18,7 @@ const createTables = async () => {
         created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
       )
-    `);
+    `)
 
     await client.query(`
       CREATE TABLE IF NOT EXISTS products (
@@ -30,12 +30,12 @@ const createTables = async () => {
         created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
       )
-    `);
+    `)
   } finally {
-    client.release();
+    client.release()
   }
-};
+}
 
-createTables();
+createTables()
 
-module.exports = pool;
+module.exports = pool
